@@ -445,3 +445,39 @@ class InvalidStringException extends Exception {
         super(mensaje);
     }
 }
+
+
+# 1. Instalar Git si aún no lo tienes instalado
+# Para Ubuntu/Debian:
+sudo apt-get install git
+
+# Para macOS (usando Homebrew):
+brew install git
+
+# Para Windows: Descarga el instalador de https://git-scm.com/download/win
+
+# 2. Configurar tu información de usuario en Git
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu.email@ejemplo.com"
+
+# 3. Generar una clave SSH (si planeas usar SSH en lugar de HTTPS)
+ssh-keygen -t ed25519 -C "tu.email@ejemplo.com"
+
+# 4. Clonar un repositorio existente
+git clone https://github.com/usuario/repositorio.git
+
+# O si usas SSH:
+git clone git@github.com:usuario/repositorio.git
+
+# 5. Si estás iniciando un nuevo repositorio local:
+mkdir mi-proyecto
+cd mi-proyecto
+git init
+git add .
+git commit -m "Commit inicial"
+
+# 6. Conectar con repositorio remoto (si iniciaste local)
+git remote add origin https://github.com/usuario/repositorio.git
+
+# 7. Subir cambios al repositorio remoto
+git push -u origin main  # o 'master' en repositorios más antiguos
