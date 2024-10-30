@@ -446,6 +446,138 @@ class InvalidStringException extends Exception {
     }
 }
 
+----
+
+/* Copyright 2003 Fifth Third Bank.  All rights reserved. */
+package com.fifththird.host.datasource.holds.builders;
+
+import java.sql.SQLException;
+
+import com.fifththird.host.framework.toolkit.Logger;
+import org.owasp.esapi.ESAPI;
+import org.owasp.esapi.errors.ValidationException;
+
+import com.fifththird.host.exceptions.BusinessException;
+import com.fifththird.host.exceptions.CriticalException;
+import com.fifththird.host.exceptions.DataSourceBusinessException;
+import com.fifththird.host.exceptions.HostIntegrationBusinessException;
+import com.fifththird.host.framework.FieldType;
+import com.fifththird.host.framework.HostResponse;
+import com.fifththird.host.service.account.CheckIfPositivePayAccountRequest;
+import com.fifththird.host.service.account.CheckIfPositivePayAccountResponse;
+import com.fifththird.host.service.holds.HoldsException;
+
+/**
+ * CheckIfPositivePayAccountBuilder determines if a given account is a Teller
+ * Line Positive Pay account.
+ * 
+ * @hiejb.returnType com.fifththird.host.datasource.holds.tx.CheckIfPositivePayAccountResponse
+ * @hiejb.methodName checkIfPositivePayAccount
+ * @author Aaron Stockmeister Created on Nov 21, 2003
+ * 
+ */
+public class CheckIfPositivePayAccountBuilder extends HoldsDatabaseBuilder {
+
+	private static String SQL = " SELECT I_BANK_ACCT, X_UPDT, Z_UPDT, "
+			+ "C_BANK, C_STA, Z_PLCMT, X_ACTVN, X_TLR_SW, X_POSTVPAY, C_PLAN_TYPE "
+			+ "FROM SP.TSP_ARP_ACCT "
+			+ " WHERE I_BANK_ACCT = ? AND X_TLR_SW != 'N'";
+
+	private CheckIfPositivePayAccountRequest request = null;
+
+	private CheckIfPositivePayAccountResponse response = null;
+	/**
+	 *  ESAPI validator constant
+	 */
+	private final int ACCOUNT_NUMBER_VALIDATOR_MAX = 25;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param request
+	 */
+	public CheckIfPositivePayAccountBuilder(
+			CheckIfPositivePayAccountRequest request) {
+		this.request = request;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.fifththird.host.framework.toolkit.RequestBuilder#buildResponse()
+	 */
+	public HostResponse buildResponse() throws CriticalException,
+			DataSourceBusinessException {
+		return response;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.fifththird.host.framework.toolkit.RequestBuilder#validate()
+	 */
+	public void validate() throws HostIntegrationBusinessException {
+		validateRequest(request);
+		validateRequiredField(FieldType.ACCOUNT_NUMBER, request
+				.getAccountNumber());
+		throwIfValidationErrors();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.fifththird.host.framework.toolkit.RequestBuilder#buildRequest()
+	 */
+	protected void buildRequest() throws CriticalException {
+		try {
+			preparedStatement = connection.prepareStatement(SQL);
+			if(!request.getAccountNumber().isEmpty()){
+			String trimmedAccountNumber  =ESAPI.validator().getValidPrintable("CheckIfPositivePayAccountBuilder-buildRequest", request.getAccountNumber().replaceAll("[^0-9]", ""), ACCOUNT_NUMBER_VALIDATOR_MAX, Boolean.TRUE);
+			preparedStatement.setString(1, trimmedAccountNumber);
+			}else{
+				Logger.log(this, "Invalid or Null Account Number", Logger.ERROR);
+			}
+		} catch(ValidationException e) {
+			throw new HoldsException("ValidationException", e);
+		} catch (SQLException e) {
+			throw new HoldsException("Exception preparing statement", e);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.fifththird.host.framework.DatabaseBuilder#setResponseData()
+	 */
+	protected void setResponseData() throws BusinessException,
+			CriticalException {
+		try {
+			response = new CheckIfPositivePayAccountResponse();
+
+			if (resultSet.next()) {
+				// if there is a matching row, it is a Teller Line Positive Pay
+				// account, it may or may not also be a Payee Line Positive Pay
+				// account.
+				response.setTellerLinePositivePay(true);
+				String payeeLineIndicator = resultSet.getString("X_TLR_SW"
+						.trim());
+				if ("B".equalsIgnoreCase(payeeLineIndicator)) {
+					response.setPayeeLinePositivePay(true);
+				}
+				response.setBankNumber(new Integer(resultSet
+						.getString("C_BANK").trim()));
+				response.setStatusCode(resultSet.getString("C_STA"));
+				response.setPlanType(resultSet.getString("C_PLAN_TYPE"));
+
+			} else {
+				response.setTellerLinePositivePay(false);
+			}
+		} catch (SQLException e) {
+			throw new HoldsException("Exception processing result set", e);
+		}
+	}
+}
+
 
 # 1. Instalar Git si aún no lo tienes instalado
 # Para Ubuntu/Debian:
