@@ -1,4 +1,4 @@
-# java
+se# java
 java repositorie
 
 
@@ -410,3 +410,38 @@ public class Main {
     }
 }
 
+public class Main {
+    public static void main(String[] args) {
+        String cadena = "123 456"; // Cambia esta cadena de prueba según necesites
+
+        try {
+            // Limpiamos espacios en blanco
+            cadena = eliminarEspacios(cadena);
+            // Validamos que sea numérica
+            validarCadenaNumerica(cadena);
+            
+            System.out.println("Cadena válida: " + cadena);
+        } catch (InvalidStringException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // Método para eliminar espacios en blanco de la cadena
+    public static String eliminarEspacios(String cadena) {
+        return cadena.replace(" ", "");
+    }
+
+    // Método para validar que la cadena sea numérica
+    public static void validarCadenaNumerica(String cadena) throws InvalidStringException {
+        if (!cadena.matches("^[0-9]+$")) {
+            throw new InvalidStringException("La cadena contiene caracteres no numéricos.");
+        }
+    }
+}
+
+// Excepción personalizada
+class InvalidStringException extends Exception {
+    public InvalidStringException(String mensaje) {
+        super(mensaje);
+    }
+}
