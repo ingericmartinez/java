@@ -379,5 +379,34 @@ public class CodeAnalyzer {
 
 
 
+import java.util.Scanner;
 
+public class Main {
+    public static void main(String[] args) {
+        String cadena = "1234"; // Cambia esta cadena de prueba según necesites
+
+        // Validamos si la cadena es numérica y tiene menos de 10 caracteres, si es así, la rellenamos
+        cadena = validarYRellenarConCeros(cadena);
+
+        System.out.println("Cadena final: " + cadena);
+    }
+
+    // Método que valida si es numérica y rellena con ceros si cumple con la longitud
+    public static String validarYRellenarConCeros(String cadena) {
+        if (cadena.length() < 10 && esNumerica(cadena)) {
+            return String.format("%-10s", cadena).replace(' ', '0'); // Rellenamos con ceros hasta alcanzar 10 caracteres
+        }
+        return cadena;
+    }
+
+    // Método que verifica si la cadena es numérica (sin expresiones regulares)
+    public static boolean esNumerica(String cadena) {
+        for (char c : cadena.toCharArray()) {
+            if (!Character.isDigit(c)) {
+                return false; // Si algún carácter no es un dígito, retorna false
+            }
+        }
+        return true; // Si todos son dígitos, retorna true
+    }
+}
 
