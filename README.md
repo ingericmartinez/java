@@ -481,3 +481,13 @@ git remote add origin https://github.com/usuario/repositorio.git
 
 # 7. Subir cambios al repositorio remoto
 git push -u origin main  # o 'master' en repositorios más antiguos
+
+
+
+#!/bin/bash
+find / -name "*.ear" | while read ear_file; do
+    md5_file="${ear_file%.ear}.md5"
+    if [ -f "$md5_file" ]; then
+        echo "$ear_file $(cat "$md5_file")" >> output-$(hostname).txt
+    fi
+done
