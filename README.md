@@ -481,3 +481,48 @@ git remote add origin https://github.com/usuario/repositorio.git
 
 # 7. Subir cambios al repositorio remoto
 git push -u origin main  # o 'master' en repositorios más antiguos
+
+
+#!/bin/ksh
+
+# Variables de directorio de configuración para cada ambiente
+DEV_DIR="/ruta/al/directorio/de/desarrollo"
+UAT_DIR="/ruta/al/directorio/de/uat"
+OUTPUT_DIR="/ruta/al/directorio/de/salida"
+
+# Archivos de configuración que queremos buscar
+CONFIG_FILES=("server.xml" "resources.xml" "security.xml")
+
+# Verificamos si el directorio de salida existe, si no, lo creamos
+if [ ! -d "$OUTPUT_DIR" ]; then
+  mkdir -p "$OUTPUT_DIR"
+fi
+
+# Función para buscar y extraer información de archivos de configuración
+extraer_info() {
+  local env_dir=$1
+  local env_name=$2
+  
+  for file in "${CONFIG_FILES[@]}"; do
+    # Busca el archivo en el directorio y sus subdirectorios
+    file_path=$(find "$env_dir" -type f -name "$file" 2>/dev/null | head -n 1)
+    
+    if [ -n "$file_path" ]; then
+      output_file="$OUTPUT_DIR/${env_name}_$file.txt"
+      echo "Procesando $file_path para $env_name"
+      echo "Archivo: $file" > "$output_file"
+      echo "===============================" >> "$output_file"
+      # Extraemos solo las líneas relevantes
+      grep -E "<resource|<jdbc|<security|<server|<application" "$file_path" >> "$output_file"
+    else
+      echo "El archivo $file no se encontró en el ambiente $env_name" > "$OUTPUT_DIR/${env_name}_$file.txt"
+    fi
+  done
+}
+
+# Ejecutamos la función para ambos ambientes
+extraer_info "$DEV_DIR" "DEV"
+extraer_info "$UAT_DIR" "UAT"
+
+# Mensaje final
+echo "Extracción completada. m Los archivos de salida están en $OUTPUT_DIR. 
